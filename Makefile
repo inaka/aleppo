@@ -1,19 +1,10 @@
-ERL=erl
-ERLC=erlc
+PROJECT = aleppo
 
 PARSER=src/aleppo_parser
 
-all: $(PARSER).erl
-	-mkdir -p ebin
-	$(ERL) -make 
-	cp src/aleppo.app.src ebin/aleppo.app
+all :: $(PARSER).erl
+
+include erlang.mk
 
 $(PARSER).erl: $(PARSER).yrl
 	$(ERLC) -o src/ src/aleppo_parser.yrl
- 
-run:
-	$(ERL) -pa ebin
-
-clean:
-	rm -fv ebin/*.beam
-	rm -fv erl_crash.dump $(PARSER).erl
