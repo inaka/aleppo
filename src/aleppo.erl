@@ -199,6 +199,16 @@ process_tree([Node|Rest], TokenAcc, Context) ->
                 process_tree(Rest, [OtherToken|TokenAcc], Context)
         end
     catch
+        _:{error, {not_found, _}} ->
+            %% Include file not found in case of `-include("filename").` or
+            %% `-include_lib("filename").` ActualToken is a string and as the
+            %% missing file is not a parse error make sure not to swallow the
+            %% dot that should follow.
+            ActualToken = erlang:element(2, Node),
+            {string, [{text, Text}, {location, {Row, Col}}], _} = ActualToken,
+            NextCol = Col + length(Text) + 1,
+            Dot = {dot, [{text, ".\n"}, {location, {Row, NextCol}}]},
+            process_tree(Rest, [Dot, ActualToken|TokenAcc], Context);
         _:_ ->
             %% Get the actual token by unboxing it from aleppo's custom token
             ActualToken = erlang:element(2, Node),
